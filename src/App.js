@@ -4,8 +4,10 @@ import ImageApiService from './ApiService/apiService.js';
 import { ImageGallery } from './Components/ImageGallery/ImageGallery.jsx';
 import { ToastContainer, toast } from 'react-toastify';
 
+import 'react-toastify/dist/ReactToastify.css';
 import styles from './Components/AppComponent/App.module.scss';
 import debounce from 'lodash.debounce';
+import { LoadMoreButton } from './Components/LoadMoreButton/LoadMoreButton.jsx';
 
 const imageApiService = new ImageApiService();
 
@@ -22,7 +24,10 @@ class App extends React.Component {
 
   proceedResponse = (response) => {
     if (response.status === 404) {
-      // errorMessage(404);
+      const notify = (message) => {
+        toast.error(message);
+      };
+      notify('error 404');
       console.log('404');
       return;
     }
@@ -36,8 +41,10 @@ class App extends React.Component {
     const imagesArray = await this.proceedResponse(response);
 
     if (imagesArray.length === 0) {
-      // warningMessage();
-      console.log('warning');
+      const notify = () => {
+        toast.warn('No images founded on your query');
+      };
+      notify();
       return;
     }
 
@@ -52,11 +59,32 @@ class App extends React.Component {
     });
   };
 
+  loadMoreImages = async () => {
+    imageApiService.nextPage();
+
+    const currentQuery = imageApiService.query;
+
+    const response = await imageApiService.fetchRequest(currentQuery);
+
+    const imagesArray = await this.proceedResponse(response);
+
+    this.setState({
+      imagesArray: [...this.state.imagesArray, ...imagesArray],
+    });
+
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
+  };
+
   render() {
     return (
       <div className={styles.App}>
         <Searchbar onSubmit={this.onSubmit} onClear={this.onClear} />
         <ImageGallery imagesArray={this.state.imagesArray} />
+        {this.state.imagesArray.length !== 0 && <LoadMoreButton loadMoreImages={this.loadMoreImages} />}
+        <ToastContainer />
       </div>
     );
   }

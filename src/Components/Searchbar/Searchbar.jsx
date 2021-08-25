@@ -40,10 +40,10 @@ class Searchbar extends React.Component {
 
   isEmptyQuery = () => {
     if (this.state.inputValue.trim() === '') {
-      const notify = (message) => {
-        toast.success(message);
+      const notify = () => {
+        toast.warn('Search query is empty.');
       };
-      notify('Search query is empty.');
+      notify();
       return true;
     }
   };
