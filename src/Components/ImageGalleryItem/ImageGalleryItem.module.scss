@@ -84,6 +84,17 @@
           padding: 0.25rem;
           background-color: #3a66e8;
           color: #FFFFFF;
+
+          border: 0;
+
+          cursor: pointer;
+
+          transition: background-color $animation-duration $timing-function;
+      }
+
+      &__load:hover {
+        background-color: #315ff5;
+
       }
 }
 

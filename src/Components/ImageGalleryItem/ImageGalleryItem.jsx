@@ -4,8 +4,16 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import CommentIcon from '@material-ui/icons/Comment';
 import GetAppIcon from '@material-ui/icons/GetApp';
 
+// import { saveAs } from 'file-saver';
+
+const onLoadClick = (href) => {
+  const FileSaver = require('file-saver');
+  FileSaver.saveAs(href, 'image.jpg');
+};
+
 export const ImageGalleryItem = ({ webformatURL, tags, largeImageURL, likes, views, comments, downloads }) => {
   const { Card, Card__wrapper, Stats, Stats__item, Card__image, Material__icon, Stats__load } = styles;
+
   return (
     <li className={Card}>
       <div className={Card__wrapper}>
@@ -29,9 +37,9 @@ export const ImageGalleryItem = ({ webformatURL, tags, largeImageURL, likes, vie
             {downloads}
           </p>
         </div>
-        <a className={Stats__load} download href={webformatURL} type="image/jpeg">
+        <button className={Stats__load} onClick={() => onLoadClick(webformatURL)} type="button">
           <GetAppIcon />
-        </a>
+        </button>
       </div>
     </li>
   );
