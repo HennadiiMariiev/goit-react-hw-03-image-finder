@@ -1,6 +1,6 @@
 import React from 'react';
 import { Searchbar } from './Components/Searchbar/Searchbar.jsx';
-import ImageApiService from './ApiService/apiService.js';
+import ImageApiService from './apiService/apiService.js';
 import { ImageGallery } from './Components/ImageGallery/ImageGallery.jsx';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import styles from './Components/AppComponent/App.module.scss';
 import debounce from 'lodash.debounce';
 import { LoadMoreButton } from './Components/LoadMoreButton/LoadMoreButton.jsx';
+import scrollDown from './utils/scrollDown.js';
 
 const imageApiService = new ImageApiService();
 
@@ -72,10 +73,7 @@ class App extends React.Component {
       imagesArray: [...this.state.imagesArray, ...imagesArray],
     });
 
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    });
+    scrollDown();
   };
 
   render() {
