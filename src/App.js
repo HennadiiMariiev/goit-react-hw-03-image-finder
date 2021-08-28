@@ -3,12 +3,15 @@ import { Searchbar } from './Components/Searchbar/Searchbar.jsx';
 import ImageApiService from './apiService/apiService.js';
 import { ImageGallery } from './Components/ImageGallery/ImageGallery.jsx';
 import { ToastContainer, toast } from 'react-toastify';
+import Loader from 'react-loader-spinner';
+
+import { LoadMoreButton } from './Components/LoadMoreButton/LoadMoreButton.jsx';
+import scrollDown from './utils/scrollDown.js';
+import Modal from './Components/Modal/Modal.jsx';
 
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './Components/AppComponent/App.module.scss';
-import debounce from 'lodash.debounce';
-import { LoadMoreButton } from './Components/LoadMoreButton/LoadMoreButton.jsx';
-import scrollDown from './utils/scrollDown.js';
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
 const imageApiService = new ImageApiService();
 
@@ -18,10 +21,11 @@ class App extends React.Component {
 
     this.state = {
       imagesArray: [],
+      isLoading: false,
+      isModalOpen: false,
+      modalImageIndex: null,
     };
   }
-
-  componentDidUpdate() {}
 
   proceedResponse = (response) => {
     if (response.status === 404) {
@@ -29,29 +33,44 @@ class App extends React.Component {
         toast.error(message);
       };
       notify('error 404');
-      console.log('404');
       return;
     }
 
     return response.hits;
   };
 
+  toggleLoader = () => {
+    this.setState({
+      isLoading: !this.state.isLoading,
+    });
+  };
+
   onSubmit = async (query) => {
-    const response = await imageApiService.fetchRequest(query);
+    this.toggleLoader();
 
-    const imagesArray = await this.proceedResponse(response);
+    try {
+      const response = await imageApiService.fetchRequest(query);
 
-    if (imagesArray.length === 0) {
+      const imagesArray = await this.proceedResponse(response);
+
+      if (imagesArray.length === 0) {
+        const notify = () => {
+          toast.warn('No images found on your query');
+        };
+        notify();
+      }
+
+      this.setState({
+        imagesArray: [...imagesArray],
+      });
+    } catch (error) {
       const notify = () => {
-        toast.warn('No images founded on your query');
+        toast.error(error);
       };
       notify();
-      return;
+    } finally {
+      this.toggleLoader();
     }
-
-    this.setState({
-      imagesArray: [...imagesArray],
-    });
   };
 
   onClear = () => {
@@ -61,27 +80,92 @@ class App extends React.Component {
   };
 
   loadMoreImages = async () => {
+    this.toggleLoader();
     imageApiService.nextPage();
 
     const currentQuery = imageApiService.query;
 
-    const response = await imageApiService.fetchRequest(currentQuery);
+    try {
+      const response = await imageApiService.fetchRequest(currentQuery);
 
-    const imagesArray = await this.proceedResponse(response);
+      const imagesArray = await this.proceedResponse(response);
 
-    this.setState({
-      imagesArray: [...this.state.imagesArray, ...imagesArray],
-    });
+      this.setState({
+        imagesArray: [...this.state.imagesArray, ...imagesArray],
+      });
+    } catch (error) {
+      const notify = () => {
+        toast.error(error);
+      };
+      notify();
+    } finally {
+      this.toggleLoader();
+    }
 
     scrollDown();
   };
 
+  switchModal = () => {
+    this.setState({
+      isModalOpen: !this.state.isModalOpen,
+    });
+  };
+
+  onGalleryListClick = (event) => {
+    if (event.target.nodeName === 'IMG') {
+      const index = this.state.imagesArray.findIndex((el) => el.webformatURL === event.target.src);
+
+      this.setState({
+        modalImageIndex: index,
+      });
+    }
+
+    this.switchModal();
+  };
+
+  showNextImage = () => {
+    let nextIndex = this.state.modalImageIndex + 1;
+
+    if (nextIndex >= this.state.imagesArray.length) {
+      nextIndex = 0;
+    }
+
+    this.setState({
+      modalImageIndex: nextIndex,
+    });
+  };
+
+  showPrevImage = () => {
+    let prevIndex = this.state.modalImageIndex - 1;
+
+    if (prevIndex < 0) {
+      prevIndex = this.state.imagesArray.length - 1;
+    }
+
+    this.setState({
+      modalImageIndex: prevIndex,
+    });
+  };
+
   render() {
+    const { imagesArray, modalImageIndex, isLoading, isModalOpen } = this.state;
+    const { onSubmit, onClear, onGalleryListClick, loadMoreImages, switchModal, showNextImage, showPrevImage } = this;
+
     return (
       <div className={styles.App}>
-        <Searchbar onSubmit={this.onSubmit} onClear={this.onClear} />
-        <ImageGallery imagesArray={this.state.imagesArray} />
-        {this.state.imagesArray.length !== 0 && <LoadMoreButton loadMoreImages={this.loadMoreImages} />}
+        <Searchbar onSubmit={onSubmit} onClear={onClear} />
+        <ImageGallery imagesArray={imagesArray} onClick={onGalleryListClick} />
+        {isLoading && <Loader type="Circles" color="#00BFFF" height={100} width={100} />}
+        {!!imagesArray.length && !isLoading && <LoadMoreButton loadMoreImages={loadMoreImages} />}
+        {isModalOpen && (
+          <Modal
+            images={imagesArray}
+            photoIndex={modalImageIndex}
+            onClose={switchModal}
+            nextImage={showNextImage}
+            prevImage={showPrevImage}
+          />
+        )}
         <ToastContainer />
       </div>
     );

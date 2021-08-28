@@ -1,6 +1,8 @@
 @import '../AppComponent/variables.module.scss';
 
 .Searchbar {
+    margin-bottom: 1rem;
+
     &__title {
         text-transform: uppercase;
         text-align: center;
@@ -24,8 +26,10 @@
     &__input {
         width: 70vw;
         margin-right: 1rem;
+        border: 0;
 
         font-size: 1.25rem;
+        outline: none;
 
         @media (min-width: 768px) {
             width: 50vw;
@@ -73,6 +77,10 @@
         @media (min-width: 768px) {
             display: unset;
         }
+    }
+
+    &__input:focus {
+        outline: 2px solid #3a66e8;
     }
   }
 

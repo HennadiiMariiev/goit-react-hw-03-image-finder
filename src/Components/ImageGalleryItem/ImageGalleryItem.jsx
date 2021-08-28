@@ -4,20 +4,18 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import CommentIcon from '@material-ui/icons/Comment';
 import GetAppIcon from '@material-ui/icons/GetApp';
 
-// import { saveAs } from 'file-saver';
-
 const onLoadClick = (href) => {
   const FileSaver = require('file-saver');
   FileSaver.saveAs(href, 'image.jpg');
 };
 
-export const ImageGalleryItem = ({ webformatURL, tags, largeImageURL, likes, views, comments, downloads }) => {
+export const ImageGalleryItem = ({ webformatURL, tags, largeImageURL, likes, views, comments, downloads, onClick }) => {
   const { Card, Card__wrapper, Stats, Stats__item, Card__image, Material__icon, Stats__load } = styles;
 
   return (
     <li className={Card}>
       <div className={Card__wrapper}>
-        <img src={webformatURL} alt={tags} data-large_img={largeImageURL} className={Card__image} />
+        <img src={webformatURL} alt={tags} data-large_img={largeImageURL} className={Card__image} onClick={onClick} />
 
         <div className={Stats}>
           <p className={Stats__item}>

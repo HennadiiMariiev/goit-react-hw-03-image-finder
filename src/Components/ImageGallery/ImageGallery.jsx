@@ -1,7 +1,7 @@
 import styles from './ImageGallery.module.scss';
 import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
 
-export const ImageGallery = ({ imagesArray }) => {
+export const ImageGallery = ({ imagesArray, onClick }) => {
   const { ImageGallery } = styles;
 
   return (
@@ -16,6 +16,7 @@ export const ImageGallery = ({ imagesArray }) => {
           comments={comments}
           downloads={downloads}
           key={id}
+          onClick={onClick}
         />
       ))}
     </ul>

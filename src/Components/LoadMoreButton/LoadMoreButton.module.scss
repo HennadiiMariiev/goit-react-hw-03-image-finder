@@ -1,0 +1,26 @@
+@import '../AppComponent/variables.module.scss';
+
+.LoadMoreButton {
+    min-width: 4rem;
+
+    font-size: 1.25rem;
+        line-height: 1.25rem;
+        font-weight: 400;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem;
+        cursor: pointer;
+        border-radius: .5rem;
+        color: $text-color;
+        background-color: #FFFFFF;
+        border: 0;
+
+        transition: $timing-function $animation-duration;
+
+        &:hover{
+            transform: translateY(-0.25rem);
+            box-shadow: 3px 3px 4px -1px rgba(0, 0, 0, 0.56);
+        }
+}
