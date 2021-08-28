@@ -25,3 +25,24 @@
     align-items: center;
     justify-content: center;
   }
+
+  .icon {
+    width: 2rem;
+    height: 2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #FAFAFA;
+    color: #3a66e8;
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    transition: 250ms ease-in-out;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }

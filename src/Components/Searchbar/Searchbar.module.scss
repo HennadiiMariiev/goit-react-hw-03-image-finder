@@ -57,6 +57,12 @@
         box-shadow: 3px 3px 4px -1px rgba(0, 0, 0, 0.56);
     }
 
+    &__button:disabled {
+        background-color: #d3d3d3;
+        transform: none;
+        box-shadow: none;
+    }
+
     &__input,
     &__button {
         padding: 0.75rem;

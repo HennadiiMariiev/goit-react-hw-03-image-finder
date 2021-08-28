@@ -2,12 +2,15 @@ import React from 'react';
 import { Searchbar } from './Components/Searchbar/Searchbar.jsx';
 import ImageApiService from './apiService/apiService.js';
 import { ImageGallery } from './Components/ImageGallery/ImageGallery.jsx';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import Loader from 'react-loader-spinner';
 
+import notificate from './utils/notification.js';
 import { LoadMoreButton } from './Components/LoadMoreButton/LoadMoreButton.jsx';
 import scrollDown from './utils/scrollDown.js';
 import Modal from './Components/Modal/Modal.jsx';
+import ScrollToTop from 'react-scroll-up';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './Components/AppComponent/App.module.scss';
@@ -27,56 +30,37 @@ class App extends React.Component {
     };
   }
 
-  proceedResponse = (response) => {
-    if (response.status === 404) {
-      const notify = (message) => {
-        toast.error(message);
-      };
-      notify('error 404');
-      return;
-    }
-
-    return response.hits;
-  };
-
   toggleLoader = () => {
-    this.setState({
-      isLoading: !this.state.isLoading,
-    });
+    this.setState((state) => ({
+      isLoading: !state.isLoading,
+    }));
   };
-
+  // this 2 functions (onSubmit and loadMoreImages) are very similar,
+  // and I was so lazy to create a new one for short-hand without code-repeat.
+  // I'm sorry)) it's better to refactor it.
   onSubmit = async (query) => {
     this.toggleLoader();
 
     try {
       const response = await imageApiService.fetchRequest(query);
 
-      const imagesArray = await this.proceedResponse(response);
-
-      if (imagesArray.length === 0) {
-        const notify = () => {
-          toast.warn('No images found on your query');
-        };
-        notify();
-      }
+      const imagesArray = response.hits;
 
       this.setState({
         imagesArray: [...imagesArray],
       });
+
+      imagesArray.length === 0
+        ? notificate('warning', 'No images found on your query')
+        : notificate(
+            'success',
+            `${imagesArray.length} new images loaded on "${imageApiService.query}" query. Total: ${this.state.imagesArray.length}`
+          );
     } catch (error) {
-      const notify = () => {
-        toast.error(error);
-      };
-      notify();
+      notificate('error', error);
     } finally {
       this.toggleLoader();
     }
-  };
-
-  onClear = () => {
-    this.setState({
-      imagesArray: [],
-    });
   };
 
   loadMoreImages = async () => {
@@ -88,21 +72,33 @@ class App extends React.Component {
     try {
       const response = await imageApiService.fetchRequest(currentQuery);
 
-      const imagesArray = await this.proceedResponse(response);
+      const imagesArray = response.hits;
 
       this.setState({
         imagesArray: [...this.state.imagesArray, ...imagesArray],
       });
+
+      if (imagesArray.length === 0) {
+        notificate('warning', 'No more images found on your query');
+      } else {
+        notificate(
+          'success',
+          `${imagesArray.length} new images loaded on "${currentQuery}" query. Total: ${this.state.imagesArray.length}`
+        );
+      }
     } catch (error) {
-      const notify = () => {
-        toast.error(error);
-      };
-      notify();
+      notificate('error', error);
     } finally {
       this.toggleLoader();
     }
 
     scrollDown();
+  };
+
+  onClear = () => {
+    this.setState({
+      imagesArray: [],
+    });
   };
 
   switchModal = () => {
@@ -154,9 +150,13 @@ class App extends React.Component {
     return (
       <div className={styles.App}>
         <Searchbar onSubmit={onSubmit} onClear={onClear} />
+
         <ImageGallery imagesArray={imagesArray} onClick={onGalleryListClick} />
+
         {isLoading && <Loader type="Circles" color="#00BFFF" height={100} width={100} />}
+
         {!!imagesArray.length && !isLoading && <LoadMoreButton loadMoreImages={loadMoreImages} />}
+
         {isModalOpen && (
           <Modal
             images={imagesArray}
@@ -166,6 +166,12 @@ class App extends React.Component {
             prevImage={showPrevImage}
           />
         )}
+
+        <ScrollToTop showUnder={160}>
+          <button type="button" className={styles.icon}>
+            <ExpandLessIcon />
+          </button>
+        </ScrollToTop>
         <ToastContainer />
       </div>
     );

@@ -1,7 +1,6 @@
 import React from 'react';
 import SearchIcon from '@material-ui/icons/Search';
 import ClearIcon from '@material-ui/icons/Clear';
-import { ToastContainer, toast } from 'react-toastify';
 
 import styles from './Searchbar.module.scss';
 
@@ -31,19 +30,11 @@ class Searchbar extends React.Component {
   onFormSubmit = (event) => {
     event.preventDefault();
 
-    if (this.isEmptyQuery()) {
-      return;
-    }
-
     this.props.onSubmit(this.state.inputValue.trim());
   };
 
-  isEmptyQuery = () => {
+  isEmptyQuery = async () => {
     if (this.state.inputValue.trim() === '') {
-      const notify = () => {
-        toast.warn('Search query is empty.');
-      };
-      notify();
       return true;
     }
   };
@@ -76,7 +67,7 @@ class Searchbar extends React.Component {
               onChange={this.onInputChange}
             />
 
-            <button type="submit" className={SearchForm__button}>
+            <button type="submit" className={SearchForm__button} disabled={this.state.inputValue.trim() === ''}>
               <SearchIcon className={Material__icon} />
               <span className={SearchForm__label}>Search</span>
             </button>
@@ -86,7 +77,6 @@ class Searchbar extends React.Component {
             </button>
           </form>
         </header>
-        <ToastContainer />
       </>
     );
   }
